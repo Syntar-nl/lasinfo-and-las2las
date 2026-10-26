@@ -19,13 +19,17 @@ RUN apk add --no-cache \
         -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_EXE_LINKER_FLAGS="-static" \
     && cmake --build /tmp/LAStools/build \
-        --target lasinfo \
+        --target lasinfo las2las \
         -j"$(nproc)" \
-    && mv /tmp/LAStools/bin64/lasinfo64 /usr/local/bin/lasinfo
+    && mv /tmp/LAStools/bin64/lasinfo64 /usr/local/bin/lasinfo \
+    && mv /tmp/LAStools/bin64/las2las64 /usr/local/bin/las2las \
+    && cp -r /tmp/LAStools/bin/serf /usr/local/bin/serf
 
 FROM gcr.io/distroless/static-debian13:nonroot
 
 ENV PATH="/usr/local/bin:${PATH}"
 COPY --from=builder /usr/local/bin/lasinfo /usr/local/bin/lasinfo
+COPY --from=builder /usr/local/bin/las2las /usr/local/bin/las2las
+COPY --from=builder /usr/local/bin/serf /usr/local/bin/serf
 
 ENTRYPOINT ["lasinfo"]
